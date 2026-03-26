@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward App by onetech limited</title>
+    <style>
+    
+/* ===== GENERAL ===== */  
+body {  
+    margin: 0;  
+    font-family: 'Segoe UI', sans-serif;  
+    background: linear-gradient(135deg, blue);  
+    color: white;  
+}  
+        :root { --primary: #007bff; --success: #28a745; --dark: #333; }
+        body { font-family: sans-serif; margin: 0; background: #f0f2f5; }
+        .hidden { display: none; }
+        .container { max-width: 450px; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
+        
+        /* Auth Styles */
+        .auth-box { padding: 30px; text-align: center; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .link-text { cursor: pointer; color: var(--primary); font-size: 14px; text-decoration: underline; }
+
+        /* Dashboard Styles */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #fff; border-bottom: 2px solid #eee; position: sticky; top: 0; z-index: 100; }
+        .points { font-weight: bold; color: var(--success); font-size: 20px; }
+        .profile-circle { width: 45px; height: 45px; border-radius: 50%; background: #eee; cursor: pointer; overflow: hidden; border: 2px solid var(--primary); }
+        .profile-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Task Cards */
+        .task-card { background: #fff; padding: 15px; border-radius: 12px; margin: 15px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .task-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .timer-text { font-size: 12px; color: #dc3545; font-weight: bold; margin-top: 5px; }
+
+        /* Profile Styles */
+        .profile-page { text-align: center; }
+        .cover-photo { width: 100%; height: 150px; background: #ddd; background-size: cover; background-position: center; }
+        .big-avatar { width: 100px; height: 100px; border-radius: 50%; background: #fff; border: 4px solid white; margin: -50px auto 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .big-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .edit-section { padding: 20px; text-align: left; background: #f9f9f9; margin: 15px; border-radius: 10px; }
+        label { font-size: 12px; color: #666; font-weight: bold; display: block; margin-top: 10px; }
+        p2 {
+        color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- 1. REGISTER UI -->
+    
+    <div id="register-ui" class="auth-box">
+      <p2>idan user dan nigeria ne zaifi samun REWARDS in dan sauran kasashene kuma REWARDS kadan </p2>  <h2 style="color: var(--primary);">Create Account</h2>
+        <input type="text" id="reg-fname" placeholder="First Name">
+        <input type="text" id="reg-sname" placeholder="Surname">
+        <input type="text" id="reg-contact" placeholder="Email or Phone Number">
+        <input type="text" id="reg-ref-by" placeholder="Referral Code (Optional)">
+        <select id="reg-country">
+            <option value="NG">Nigeria 🇳🇬</option>
+            <option value="UK">United Kingdom 🇬🇧</option>
+            <option value="US">USA 🇺🇸</option>
+        </select>
+        <button onclick="sendOTP()">Get OTP</button>
+        <div id="otp-area" class="hidden">
+            <p style="font-size: 12px; color: #666;">Dubu OTP a cikin alert!</p>
+            <input type="number" id="input-otp" placeholder="Enter OTP">
+            <button onclick="verifyAndRegister()" style="background: var(--success);">Verify & Register</button>
+        </div>
+        <p>Ina da account? <span class="link-text" onclick="toggleAuth('login-ui')">Log In</span></p>
+    </div>
+
+    <!-- 2. LOGIN UI -->
+    <div id="login-ui" class="auth-box hidden">
+        <h2 style="color: var(--primary);">Welcome Back</h2>
+        <p style="font-size: 14px; color: #666;">Shigar da Email ko Phone dinka</p>
+        <input type="text" id="login-id" placeholder="Email or Phone Number">
+        <button onclick="login()">Log In</button>
+        <p>Bani da account? <span class="link-text" onclick="toggleAuth('register-ui')">Register</span></p>
+    </div>
+
+    <!-- 3. DASHBOARD UI -->
+    <div id="dashboard-ui" class="hidden">
+        <div class="header">
+            <div class="points">🪙 <span id="balance">0</span></div>
+            <div class="profile-circle" onclick="showProfile()" id="top-avatar"></div>
+        </div>
+
+        <div style="padding: 10px;">
+            <h3 style="margin-left: 15px;">Daily Tasks</h3>
+            <!-- Hourly Task -->
+            <div class="task-card">
+                <div class="task-info">
+                    <span><b>Hourly Bonus</b></span>
+                    <span style="color: var(--success);" id="hourly-pts-text">+0 pts</span>
+                </div>
+                <button id="hourly-btn" onclick="claimReward('hourly', 1)">Claim Reward</button>
+                <div id="hourly-timer" class="timer-text"></div>
+            </div>
+
+            <!-- Ads Task -->
+            <div class="task-card">
+                <div class="task-info">
+                    <span><b>Watch Ads</b></span>
+                    <span style="color: var(--success);" id="ads-pts-text">+0 pts</span>
+                </div>
+                <button id="ads-btn" onclick="claimReward('ads', 0.05)">Watch Ad (3 Mins)</button>
+                <div id="ads-timer" class="timer-text"></div>
+            </div>
+
+            <!-- Referral Card -->
+            <div class="task-card" style="background: #fff3cd; border-color: #ffeeba;">
+                <div class="task-info"><span><b>Referral Program</b></span></div>
+                <p style="font-size: 13px;">Gayuaci aboki ka samu 2000 points!</p>
+                <p style="font-size: 12px; margin: 5px 0;">Your Code: <b id="my-ref-code"></b></p>
+                <button onclick="copyRefCode()" style="background: orange; padding: 8px;">Copy My Code</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PROFILE UI -->
+    <div id="profile-ui" class="hidden profile-page">
+        <div class="header">
+            <button onclick="showDashboard()" style="width: auto; margin:0; padding: 5px 15px;">⬅ Back</button>
+            <b>My Profile</b>
+            <div style="width:40px"></div>
+        </div>
+
+        <div class="cover-photo" id="p-cover"></div>
+        <div class="big-avatar" id="p-avatar"></div>
+        
+        <h2 id="p-name" style="margin: 5px 0;"></h2>
+        <p id="p-status" style="color: red; font-size: 12px; font-weight: bold;"></p>
+
+        <div class="edit-section">
+            <button onclick="toggleEdit()" id="edit-toggle-btn">Edit Profile Info</button>
+            
+            <div id="edit-fields" class="hidden">
+                <label>Work / Profession</label><input type="text" id="in-work">
+                <label>Education Level</label><input type="text" id="in-edu">
+                <label>Address</label><input type="text" id="in-addr">
+                <label>City & State</label><input type="text" id="in-state">
+                
+                <label>Change Profile Picture</label>
+                <input type="file" id="file-pic" accept="image/*">
+                
+                <label>Change Cover Photo</label>
+                <input type="file" id="file-bg" accept="image/*">
+                
+                <button onclick="saveProfile()" style="background: var(--success); margin-top: 15px;">Save All Changes</button>
+            </div>
+            <button onclick="logout()" style="background: #dc3545; margin-top: 20px;">Sign Out (Logout)</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let user = null;
+
+    // --- UTILS ---
+    function toggleAuth(id) {
+        document.getElementById('register-ui').classList.add('hidden');
+        document.getElementById('login-ui').classList.add('hidden');
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    // --- AUTH LOGIC ---
+    function sendOTP() {
+        let otp = Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem('temp_otp', otp);
+        alert("Verification Code: " + otp);
+        document.getElementById('otp-area').classList.remove('hidden');
+    }
+
+    function verifyAndRegister() {
+        const contact = document.getElementById('reg-contact').value;
+        const refBy = document.getElementById('reg-ref-by').value;
+
+        if(localStorage.getItem(contact)) return alert("Account already exists!");
+        if(document.getElementById('input-otp').value != localStorage.getItem('temp_otp')) return alert("OTP Wrong!");
+
+        user = {
+            fname: document.getElementById('reg-fname').value,
+            sname: document.getElementById('reg-sname').value,
+            contact: contact,
+            country: document.getElementById('reg-country').value,
+            points: 0,
+            isComplete: false,
+            work: '', edu: '', addr: '', state: '', pic: '', bg: ''
+        };
+
+        // Referral Logic
+        if(refBy && localStorage.getItem(refBy)) {
+            let referrer = JSON.parse(localStorage.getItem(refBy));
+            referrer.points += (referrer.country === 'NG') ? 2000 : 1000;
+            localStorage.setItem(referrer.contact, JSON.stringify(referrer));
+            alert("Referral bonus sent to " + refBy);
+        }
+
+        localStorage.setItem(contact, JSON.stringify(user));
+        localStorage.setItem('activeSession', contact);
+        initApp();
+    }
+
+    function login() {
+        const id = document.getElementById('login-id').value;
+        const data = localStorage.getItem(id);
+        if(data) {
+            localStorage.setItem('activeSession', id);
+            initApp();
+        } else {
+            alert("Account not found. Please register!");
+        }
+    }
+
+    // --- CORE APP ---
+    function initApp() {
+        const session = localStorage.getItem('activeSession');
+        if(!session) return;
+        user = JSON.parse(localStorage.getItem(session));
+
+        document.getElementById('register-ui').classList.add('hidden');
+        document.getElementById('login-ui').classList.add('hidden');
+        document.getElementById('dashboard-ui').classList.remove('hidden');
+        document.getElementById('profile-ui').classList.add('hidden');
+
+        document.getElementById('hourly-pts-text').innerText = (user.country === 'NG') ? "+1000 pts" : "+450 pts";
+        document.getElementById('ads-pts-text').innerText = (user.country === 'NG') ? "+500 pts" : "+300 pts";
+        document.getElementById('my-ref-code').innerText = user.contact;
+        
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('balance').innerText = user.points;
+        const pic = user.pic || 'https://via.placeholder.com';
+        const bg = user.bg || '#ddd';
+        
+        document.getElementById('top-avatar').innerHTML = `<img src="${pic}">`;
+        document.getElementById('p-avatar').innerHTML = `<img src="${pic}">`;
+        document.getElementById('p-cover').style.backgroundImage = `url(${bg})`;
+        document.getElementById('p-name').innerText = user.fname + " " + user.sname;
+        document.getElementById('p-status').innerText = user.isComplete ? "✅ Profile Completed" : "⚠️ Complete your profile";
+    }
+
+    // --- REWARDS ---
+    function claimReward(type, hours) {
+        const last = localStorage.getItem(`last_${type}_${user.contact}`);
+        const now = Date.now();
+        if(last && (now - last < hours * 3600000)) return alert("Wait for the timer!");
+
+        let gain = 0;
+        if(type === 'hourly') gain = (user.country === 'NG') ? 1000 : 450;
+        if(type === 'ads') gain = (user.country === 'NG') ? 500 : 300;
+
+        user.points += gain;
+        localStorage.setItem(user.contact, JSON.stringify(user));
+        localStorage.setItem(`last_${type}_${user.contact}`, now);
+        updateUI();
+        alert(`You earned ${gain} points!`);
+    }
+
+    // --- PROFILE ---
+    function toggleEdit() { document.getElementById('edit-fields').classList.toggle('hidden'); }
+
+    function saveProfile() {
+        user.work = document.getElementById('in-work').value;
+        user.addr = document.getElementById('in-addr').value;
+        user.state = document.getElementById('in-state').value;
+        user.edu = document.getElementById('in-edu').value;
+        user.isComplete = true;
+
+        const picFile = document.getElementById('file-pic').files[0];
+        const bgFile = document.getElementById('file-bg').files[0];
+
+        const reader = new FileReader();
+        if(picFile) {
+            const r1 = new FileReader();
+            r1.onload = (e) => { user.pic = e.target.result; finishSave(); };
+            r1.readAsDataURL(picFile);
+        } else if (bgFile) {
+            const r2 = new FileReader();
+            r2.onload = (e) => { user.bg = e.target.result; finishSave(); };
+            r2.readAsDataURL(bgFile);
+        } else { finishSave(); }
+
+        function finishSave() {
+            localStorage.setItem(user.contact, JSON.stringify(user));
+            updateUI();
+            alert("Saved!");
+        }
+    }
+
+    // --- TIMERS ---
+    setInterval(() => {
+        if(!user) return;
+        ['hourly', 'ads'].forEach(type => {
+            const last = localStorage.getItem(`last_${type}_${user.contact}`);
+            const btn = document.getElementById(`${type}-btn`);
+            const timer = document.getElementById(`${type}-timer`);
+            const h = (type === 'hourly') ? 1 : 0.05;
+
+            if(last) {
+                const diff = (h * 3600000) - (Date.now() - last);
+                if(diff > 0) {
+                    btn.disabled = true;
+                    let m = Math.floor(diff/60000); let s = Math.floor((diff%60000)/1000);
+                    timer.innerText = `Retry in ${m}m ${s}s`;
+                } else { btn.disabled = false; timer.innerText = ""; }
+            }
+        });
+    }, 1000);
+
+    function copyRefCode() { navigator.clipboard.writeText(user.contact); alert("Code Copied!"); }
+    function showProfile() { document.getElementById('dashboard-ui').classList.add('hidden'); document.getElementById('profile-ui').classList.remove('hidden'); }
+    function showDashboard() { document.getElementById('profile-ui').classList.add('hidden'); document.getElementById('dashboard-ui').classList.remove('hidden'); }
+    function logout() { localStorage.removeItem('activeSession'); location.reload(); }
+
+    if(localStorage.getItem('activeSession')) initApp();
+</script>
+</body>
+</html>
